@@ -7,6 +7,7 @@ import logger from '../core/logger.js';
 import Module from '../core/module.js';
 import type { BlockEmbed } from '../blots/block.js';
 import type { Range } from '../core/selection.js';
+import { SOFT_BREAK_CHARACTER } from '../blots/soft-break.js';
 
 // eslint-disable-next-line no-irregular-whitespace
 export const ZERO_SPACE = String.fromCharCode(0x200b); // '&#8203;​'
@@ -117,6 +118,13 @@ class Keyboard extends Module<KeyboardOptions> {
         this.addBinding(this.options.bindings[name]);
       }
     });
+    this.addBinding(
+      {
+        key: Keyboard.keys.ENTER,
+        shiftKey: true,
+      },
+      this.handleShiftEnter,
+    );
     this.addBinding(
       { key: Keyboard.keys.ENTER, shiftKey: null },
       this.handleEnter,
@@ -402,6 +410,11 @@ class Keyboard extends Module<KeyboardOptions> {
         this.quill.setSelection(range.index + 1);
       }, 0);
     }
+  }
+
+  handleShiftEnter(range: Range) {
+    this.quill.insertText(range.index, SOFT_BREAK_CHARACTER);
+    this.quill.setSelection(range.index + 1);
   }
 }
 
