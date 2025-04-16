@@ -19,6 +19,17 @@ window.MARKER = IOS_DICTATION_MARKER;
 // @ts-ignore
 window.WORD_JOINER = WORD_JOINER;
 
+// @ts-ignore
+window.RANGE_CHANGER = (range: Range) => {
+  console.log('RANGE_CHANGER', range);
+};
+
+// @ts-ignore
+window.REMOVER = (range: Range, quill: Quill) => {
+  console.log('REMOVER', range);
+  quill.deleteText(0, 1, Quill.sources.SILENT);
+};
+
 class Input extends Module {
   constructor(quill: Quill, options: Record<string, never>) {
     super(quill, options);
@@ -156,7 +167,13 @@ class Input extends Module {
 
       if (IS_IOS && currentTextStartsWithMarker) {
         debug.log('handleBeforeInput: Deleting marker', { text, currentText });
-        this.quill.deleteText(0, 1, Quill.sources.SILENT);
+        // @ts-ignore
+        if (window.REMOVER) {
+          // @ts-ignore
+          window.REMOVER(range, this.quill);
+        } else {
+          this.quill.deleteText(0, 1, Quill.sources.SILENT);
+        }
       }
     }
   }
