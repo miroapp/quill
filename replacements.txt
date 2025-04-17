@@ -1,0 +1,1 @@
+    "registry": "https://artifactory.tools.devrtb.com/artifactory/api/npm/npm-local/"==
