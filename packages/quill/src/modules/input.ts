@@ -14,22 +14,6 @@ const IOS_DICTATION_MARKER = WORD_JOINER;
 const IS_ANDROID = /Android/.test(navigator.userAgent);
 const WHITESPACE_REGEX = /\s/;
 
-// @ts-ignore
-window.MARKER = IOS_DICTATION_MARKER;
-// @ts-ignore
-window.WORD_JOINER = WORD_JOINER;
-
-// @ts-ignore
-window.RANGE_CHANGER = (range: Range) => {
-  console.log('RANGE_CHANGER', range);
-};
-
-// @ts-ignore
-window.REMOVER = (range: Range, quill: Quill) => {
-  console.log('REMOVER', range);
-  quill.deleteText(0, 1, Quill.sources.SILENT);
-};
-
 class Input extends Module {
   constructor(quill: Quill, options: Record<string, never>) {
     super(quill, options);
@@ -37,9 +21,6 @@ class Input extends Module {
     quill.root.addEventListener('beforeinput', (event) => {
       this.handleBeforeInput(event);
     });
-
-    // @ts-ignore
-    window.QUILL = quill;
 
     if (IS_IOS) {
       debug.log('Adding text change listener because of iOS');
@@ -67,7 +48,6 @@ class Input extends Module {
 
     if (IS_IOS && !textStartsWithMarker && sourceIsApi && textIsWhitespace) {
       debug.log('Inserting marker because of iOS');
-      // @ts-ignore
       this.quill.insertText(0, IOS_DICTATION_MARKER, Quill.sources.SILENT);
     }
   }
@@ -76,7 +56,7 @@ class Input extends Module {
     deleteRange({ range, quill: this.quill });
   }
 
-  private replaceText(range: Range, text = '') {
+  private replaceText(range: Range, text: string | null | undefined = '') {
     if (range.length === 0) {
       debug.log('Range length is 0');
       return false;
@@ -94,7 +74,11 @@ class Input extends Module {
       this.deleteRange(range);
     }
 
-    this.quill.setSelection(range.index + text.length, 0, Quill.sources.SILENT);
+    this.quill.setSelection(
+      range.index + (text?.length ?? 0),
+      0,
+      Quill.sources.SILENT,
+    );
 
     return true;
   }
@@ -132,7 +116,7 @@ class Input extends Module {
       return;
     }
 
-    let text = getPlainTextFromInputEvent(event);
+    const text = getPlainTextFromInputEvent(event);
 
     debug.log('handleBeforeInput: Text', text);
 
@@ -149,14 +133,6 @@ class Input extends Module {
 
     debug.log('handleBeforeInput: Range', range);
 
-    const textStartsWithSpace = text[0] === ' ';
-    const isComposing = this.quill.composition.isComposing;
-
-    if (IS_IOS && !isComposing && textStartsWithSpace) {
-      debug.log('handleBeforeInput: Removing space', { text });
-      text = text.slice(1);
-    }
-
     if (range && this.replaceText(range, text)) {
       debug.log('handleBeforeInput: Preventing');
       event.preventDefault();
@@ -167,13 +143,7 @@ class Input extends Module {
 
       if (IS_IOS && currentTextStartsWithMarker) {
         debug.log('handleBeforeInput: Deleting marker', { text, currentText });
-        // @ts-ignore
-        if (window.REMOVER) {
-          // @ts-ignore
-          window.REMOVER(range, this.quill);
-        } else {
-          this.quill.deleteText(0, 1, Quill.sources.SILENT);
-        }
+        this.quill.deleteText(0, 1, Quill.sources.SILENT);
       }
     }
   }
