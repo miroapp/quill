@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { isSafariOrWebKit, _clearBrowserDetectionCache } from '../../../../src/core/utils/browser.js';
+import {
+  isSafariOrWebKit,
+  _clearBrowserDetectionCache,
+} from '../../../../src/core/utils/browser.js';
 
 describe('Browser Detection', () => {
   let originalUserAgent: PropertyDescriptor | undefined;
@@ -10,7 +13,7 @@ describe('Browser Detection', () => {
   beforeEach(() => {
     // Clear the cache before each test
     _clearBrowserDetectionCache();
-    
+
     originalUserAgent = Object.getOwnPropertyDescriptor(navigator, 'userAgent');
     originalVendor = Object.getOwnPropertyDescriptor(navigator, 'vendor');
     originalPlatform = Object.getOwnPropertyDescriptor(navigator, 'platform');

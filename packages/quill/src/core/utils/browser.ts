@@ -38,4 +38,3 @@ export function isSafariOrWebKit(): boolean {
   isSafariOrWebKitCache = isSafari || isIOS;
   return isSafariOrWebKitCache;
 }
-
