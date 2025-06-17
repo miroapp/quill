@@ -26,7 +26,10 @@ class Composition {
 
     this.scroll.domNode.addEventListener('compositionend', (event) => {
       if (this.isComposing) {
-        // Only use queueMicrotask for Safari/WebKit browsers where the bug exists
+        // Only use queueMicrotask for WebKit browsers where the bug exists.
+        // When we call blur() to trigger "compositionend" before destroying the editor, the async handling means the
+        // Delta updates after we've already called getHTML(). Synchronous handling ensures the Delta updates
+        // immediately within the same tick, capturing all text.
         if (isWebkit()) {
           // HACK: There is a bug in the safari browser in mobile devices and when we finish typing
           // composition symbol MutationObserver dispatches part of events after firing compositionend event
