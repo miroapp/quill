@@ -7,25 +7,24 @@
  * @internal
  */
 export function _clearBrowserDetectionCache(): void {
-  isSafariOrWebKitCache = undefined;
+  isWebkitCache = undefined;
 }
 
 // Cache results to avoid repeated calculations during typing
-let isSafariOrWebKitCache: boolean | undefined;
+let isWebkitCache: boolean | undefined;
 
 /**
- * Detects if the browser is Safari or WebKit-based on iOS/iPadOS
- * This is used to handle Safari-specific bugs with composition events
+ * Detects if the browser is WebKit-based (e.g., Safari, iOS browsers).
  */
-export function isSafariOrWebKit(): boolean {
+export function isWebkit(): boolean {
   // Return cached result if available
-  if (isSafariOrWebKitCache !== undefined) {
-    return isSafariOrWebKitCache;
+  if (isWebkitCache !== undefined) {
+    return isWebkitCache;
   }
 
   const userAgent = navigator.userAgent.toLowerCase();
 
-  // Check for Safari on macOS (not Chrome)
+  // Check for Safari on macOS
   const isSafari =
     userAgent.includes('safari') && !userAgent.includes('chrome');
 
@@ -35,6 +34,6 @@ export function isSafariOrWebKit(): boolean {
     (userAgent.includes('mac') && navigator.maxTouchPoints > 1);
 
   // Cache and return result
-  isSafariOrWebKitCache = isSafari || isIOS;
-  return isSafariOrWebKitCache;
+  isWebkitCache = isSafari || isIOS;
+  return isWebkitCache;
 }

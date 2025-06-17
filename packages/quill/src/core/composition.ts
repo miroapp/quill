@@ -1,7 +1,7 @@
 import Embed from '../blots/embed.js';
 import type Scroll from '../blots/scroll.js';
 import Emitter from './emitter.js';
-import { isSafariOrWebKit } from './utils/browser.js';
+import { isWebkit } from './utils/browser.js';
 
 class Composition {
   isComposing = false;
@@ -27,7 +27,7 @@ class Composition {
     this.scroll.domNode.addEventListener('compositionend', (event) => {
       if (this.isComposing) {
         // Only use queueMicrotask for Safari/WebKit browsers where the bug exists
-        if (isSafariOrWebKit()) {
+        if (isWebkit()) {
           // HACK: There is a bug in the safari browser in mobile devices and when we finish typing
           // composition symbol MutationObserver dispatches part of events after firing compositionend event
           // In normal behaviour MutationObserver dispatches all event before firing compositionend event

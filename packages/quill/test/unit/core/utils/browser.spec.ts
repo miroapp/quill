@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  isSafariOrWebKit,
+  isWebkit,
   _clearBrowserDetectionCache,
 } from '../../../../src/core/utils/browser.js';
 
@@ -76,7 +76,7 @@ describe('Browser Detection', () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
         'Apple Computer, Inc.',
       );
-      expect(isSafariOrWebKit()).toBe(true);
+      expect(isWebkit()).toBe(true);
     });
 
     it('detects Safari on iOS', () => {
@@ -85,7 +85,7 @@ describe('Browser Detection', () => {
         'Apple Computer, Inc.',
         'iPhone',
       );
-      expect(isSafariOrWebKit()).toBe(true);
+      expect(isWebkit()).toBe(true);
     });
 
     it('detects Safari on iPad', () => {
@@ -94,7 +94,7 @@ describe('Browser Detection', () => {
         'Apple Computer, Inc.',
         'iPad',
       );
-      expect(isSafariOrWebKit()).toBe(true);
+      expect(isWebkit()).toBe(true);
     });
 
     it('detects iPad with desktop mode (iPadOS 13+)', () => {
@@ -104,7 +104,7 @@ describe('Browser Detection', () => {
         'MacIntel',
         5, // iPad has multiple touch points
       );
-      expect(isSafariOrWebKit()).toBe(true);
+      expect(isWebkit()).toBe(true);
     });
 
     it('does not detect Chrome on macOS', () => {
@@ -112,7 +112,7 @@ describe('Browser Detection', () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
         'Google Inc.',
       );
-      expect(isSafariOrWebKit()).toBe(false);
+      expect(isWebkit()).toBe(false);
     });
 
     it('does not detect Firefox', () => {
@@ -120,7 +120,7 @@ describe('Browser Detection', () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15) Gecko/20100101 Firefox/119.0',
         '',
       );
-      expect(isSafariOrWebKit()).toBe(false);
+      expect(isWebkit()).toBe(false);
     });
 
     it('does not detect Chrome on Android', () => {
@@ -129,7 +129,7 @@ describe('Browser Detection', () => {
         'Google Inc.',
         'Linux armv8l',
       );
-      expect(isSafariOrWebKit()).toBe(false);
+      expect(isWebkit()).toBe(false);
     });
 
     it('returns consistent results when called multiple times', () => {
@@ -137,21 +137,21 @@ describe('Browser Detection', () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
         'Apple Computer, Inc.',
       );
-      const firstCall = isSafariOrWebKit();
+      const firstCall = isWebkit();
       mockNavigator(
         'different user agent',
         'different vendor',
         'different platform',
         1,
       );
-      const secondCall = isSafariOrWebKit();
+      const secondCall = isWebkit();
       mockNavigator(
         'another user agent',
         'another vendor',
         'another platform',
         2,
       );
-      const thirdCall = isSafariOrWebKit();
+      const thirdCall = isWebkit();
 
       expect(firstCall).toBe(true);
       expect(secondCall).toBe(true);
