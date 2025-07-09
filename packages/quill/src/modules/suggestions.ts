@@ -124,13 +124,16 @@ class Suggestions extends Module<SuggestionsOptions> {
   async triggerSuggestion(): Promise<void> {
     if (!this.options.enabled) return;
 
+    // Get current range first, before any cancellation
+    const range = this.quill.getSelection();
+    if (!range || range.length > 0) return; // Only work with collapsed selection
+
     // If already active, cancel current suggestion first
     if (this.isActive) {
       this.cancelSuggestion();
+      // Restore cursor position after cancellation
+      this.quill.setSelection(range.index, 0);
     }
-
-    const range = this.quill.getSelection();
-    if (!range || range.length > 0) return; // Only work with collapsed selection
 
     const context = this.buildSuggestionContext(range);
 
