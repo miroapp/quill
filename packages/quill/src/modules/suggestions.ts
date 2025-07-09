@@ -122,7 +122,12 @@ class Suggestions extends Module<SuggestionsOptions> {
    * Trigger inline suggestion at current cursor position
    */
   async triggerSuggestion(): Promise<void> {
-    if (!this.options.enabled || this.isActive) return;
+    if (!this.options.enabled) return;
+
+    // If already active, cancel current suggestion first
+    if (this.isActive) {
+      this.cancelSuggestion();
+    }
 
     const range = this.quill.getSelection();
     if (!range || range.length > 0) return; // Only work with collapsed selection
