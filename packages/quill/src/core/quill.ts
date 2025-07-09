@@ -844,31 +844,48 @@ class Quill {
   }
 
   private convertSuggestionsToText(): Delta {
-    const changes = new Delta();
     const currentDelta = this.getContents();
+    const cleanDelta = new Delta();
+    let suggestionEndIndex = 0;
+    let hasSuggestion = false;
 
     // Create a new delta without suggestion formatting
-    currentDelta.ops.forEach((op, index) => {
+    currentDelta.ops.forEach((op) => {
       if (
         op.insert &&
         typeof op.insert === 'string' &&
         op.attributes &&
         op.attributes['suggestion-text']
       ) {
-        // Remove suggestion format, keep the text
+        // This is suggestion text - keep the text but remove the suggestion format
         const cleanAttributes = { ...op.attributes };
         delete cleanAttributes['suggestion-text'];
-        changes.insert(
+        cleanDelta.insert(
           op.insert,
           Object.keys(cleanAttributes).length > 0 ? cleanAttributes : undefined,
         );
+        suggestionEndIndex += op.insert.length;
+        hasSuggestion = true;
       } else {
-        changes.push(op);
+        cleanDelta.push(op);
+        if (!hasSuggestion && typeof op.insert === 'string') {
+          suggestionEndIndex += op.insert.length;
+        }
       }
     });
 
     // Apply the cleaned content
-    this.setContents(changes, Emitter.sources.SILENT);
+    this.setContents(cleanDelta, Emitter.sources.SILENT);
+
+    // Position cursor at the end of the accepted suggestion
+    if (hasSuggestion) {
+      this.setSelection(suggestionEndIndex, 0, Emitter.sources.SILENT);
+    }
+
+    // Calculate what changed
+    const changes = this.primaryDelta
+      ? cleanDelta.diff(this.primaryDelta)
+      : new Delta();
     return changes;
   }
 
