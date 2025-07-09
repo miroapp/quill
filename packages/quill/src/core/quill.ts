@@ -194,6 +194,10 @@ class Quill {
 
   options: ExpandedQuillOptions;
 
+  // Suggestions state
+  private isSuggestionsMode: boolean = false;
+  private primaryDelta: Delta | null = null;
+
   constructor(container: HTMLElement | string, options: QuillOptions = {}) {
     this.options = expandConfig(container, options);
     this.container = this.options.container;
@@ -619,6 +623,23 @@ class Quill {
     // eslint-disable-next-line prefer-const
     // @ts-expect-error
     [index, , formats, source] = overload(index, 0, name, value, source);
+
+    // Handle suggestions mode
+    if (this.isSuggestionsMode) {
+      return modify.call(
+        this,
+        () => {
+          // Insert text with suggestion format
+          return this.editor.insertText(index, text, {
+            'suggestion-text': true,
+          });
+        },
+        source,
+        index,
+        text.length,
+      );
+    }
+
     return modify.call(
       this,
       () => {
@@ -777,6 +798,96 @@ class Quill {
       source,
       true,
     );
+  }
+
+  // Suggestions API methods
+  suggestionsStart(): void {
+    if (this.isSuggestionsMode) return;
+
+    this.primaryDelta = this.getContents();
+    this.isSuggestionsMode = true;
+    this.scroll.batchStart();
+    this.container.classList.add('ql-suggestions-mode');
+  }
+
+  suggestionsAccept(): Delta {
+    if (!this.isSuggestionsMode) return new Delta();
+
+    // Convert suggestion blots to regular text blots
+    const changes = this.convertSuggestionsToText();
+    this.scroll.batchEnd();
+    this.container.classList.remove('ql-suggestions-mode');
+    this.isSuggestionsMode = false;
+
+    if (changes.length() > 0) {
+      this.emitter.emit(
+        Emitter.events.TEXT_CHANGE,
+        changes,
+        this.primaryDelta,
+        Emitter.sources.API,
+      );
+    }
+
+    return changes;
+  }
+
+  suggestionsCancel(): void {
+    if (!this.isSuggestionsMode) return;
+
+    this.removeSuggestionBlots();
+    this.scroll.batchEnd();
+    this.container.classList.remove('ql-suggestions-mode');
+    this.isSuggestionsMode = false;
+  }
+
+  private convertSuggestionsToText(): Delta {
+    const changes = new Delta();
+    const currentDelta = this.getContents();
+
+    // Create a new delta without suggestion formatting
+    currentDelta.ops.forEach((op, index) => {
+      if (
+        op.insert &&
+        typeof op.insert === 'string' &&
+        op.attributes &&
+        op.attributes['suggestion-text']
+      ) {
+        // Remove suggestion format, keep the text
+        const cleanAttributes = { ...op.attributes };
+        delete cleanAttributes['suggestion-text'];
+        changes.insert(
+          op.insert,
+          Object.keys(cleanAttributes).length > 0 ? cleanAttributes : undefined,
+        );
+      } else {
+        changes.push(op);
+      }
+    });
+
+    // Apply the cleaned content
+    this.setContents(changes, Emitter.sources.SILENT);
+    return changes;
+  }
+
+  private removeSuggestionBlots(): void {
+    const currentDelta = this.getContents();
+    const cleanDelta = new Delta();
+
+    // Remove all text with suggestion formatting
+    currentDelta.ops.forEach((op) => {
+      if (
+        op.insert &&
+        typeof op.insert === 'string' &&
+        op.attributes &&
+        op.attributes['suggestion-text']
+      ) {
+        // Skip this text (remove it)
+      } else {
+        cleanDelta.push(op);
+      }
+    });
+
+    this.setContents(cleanDelta, Emitter.sources.SILENT);
   }
 }
 

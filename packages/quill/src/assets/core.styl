@@ -202,6 +202,32 @@ resets(arr)
   .ql-align-right
     text-align: right
 
+// Suggestion text styling for hackathon prototype
+.ql-suggestion-text
+  color: #999
+  background: rgba(0, 123, 255, 0.05)
+  font-style: italic
+  user-select: none
+  pointer-events: none
+  position: relative
+  border-radius: 2px
+  padding: 0 1px
+
+  // Animation
+  animation: suggestionFadeIn 0.3s ease-in-out
+
+@keyframes suggestionFadeIn
+  from
+    opacity: 0
+    transform: translateY(-1px)
+  to
+    opacity: 1
+    transform: translateY(0)
+
+// Suggestions mode indicator
+.ql-editor.ql-suggestions-mode
+  // Optional: add mode indicators if needed
+
   .ql-ui
     position: absolute
 

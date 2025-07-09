@@ -16,6 +16,7 @@ import Inline from './blots/inline.js';
 import Scroll from './blots/scroll.js';
 import TextBlot from './blots/text.js';
 import SoftBreak from './blots/soft-break.js';
+import SuggestionTextBlot from './blots/suggestion-text.js';
 
 import Clipboard from './modules/clipboard.js';
 import History from './modules/history.js';
@@ -46,6 +47,7 @@ Quill.register({
   'blots/inline': Inline,
   'blots/scroll': Scroll,
   'blots/text': TextBlot,
+  'blots/suggestion-text': SuggestionTextBlot,
 
   'modules/clipboard': Clipboard,
   'modules/history': History,
