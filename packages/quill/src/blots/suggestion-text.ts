@@ -7,7 +7,8 @@ class SuggestionTextBlot extends Inline {
 
   static create() {
     const node = super.create();
-    node.setAttribute('contenteditable', 'false');
+    // Don't use contenteditable=false as it disrupts cursor positioning
+    // Instead rely on CSS to make it non-interactive
     node.classList.add(this.className);
     return node;
   }
