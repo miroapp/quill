@@ -40,6 +40,7 @@ module.exports = (env) =>
         writeToDisk: true, // Write files to disk so they're available
       },
       watchFiles: ['src/**/*'],
+      port: 3000,
     },
     stats: 'minimal',
     // Enable watching in development mode
