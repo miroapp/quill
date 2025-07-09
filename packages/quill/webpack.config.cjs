@@ -32,11 +32,20 @@ module.exports = (env) =>
       static: {
         directory: resolve(__dirname, './dist'),
       },
-      hot: false,
+      hot: true,
+      liveReload: true,
       allowedHosts: 'all',
       devMiddleware: {
         stats: 'minimal',
+        writeToDisk: true, // Write files to disk so they're available
       },
+      watchFiles: ['src/**/*'],
     },
     stats: 'minimal',
+    // Enable watching in development mode
+    watch: !env.production,
+    watchOptions: {
+      ignored: /node_modules/,
+      poll: 1000,
+    },
   });

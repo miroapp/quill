@@ -636,7 +636,7 @@ class Quill {
         },
         source,
         index,
-        text.length,
+        0,
       );
     }
 
