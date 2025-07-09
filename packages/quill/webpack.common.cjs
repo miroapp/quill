@@ -2,6 +2,7 @@
 
 const { resolve } = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const tsRules = {
   test: /\.ts$/,
@@ -64,6 +65,16 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name]',
+    }),
+    new HtmlWebpackPlugin({
+      template: resolve(__dirname, 'src/playground/index.html'),
+      filename: resolve(__dirname, 'dist/index.html'),
+      inject: false, // Manual control over script/CSS loading
+      minify: false,
+      templateParameters: {
+        buildTime: new Date().toISOString(),
+        env: process.env.NODE_ENV || 'development',
+      },
     }),
   ],
 };
