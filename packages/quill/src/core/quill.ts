@@ -9,6 +9,7 @@ import type Clipboard from '../modules/clipboard.js';
 import type History from '../modules/history.js';
 import type Keyboard from '../modules/keyboard.js';
 import type Uploader from '../modules/uploader.js';
+import type Suggestions from '../modules/suggestions.js';
 import Editor from './editor.js';
 import Emitter from './emitter.js';
 import type { EmitterSource } from './emitter.js';
@@ -81,6 +82,7 @@ class Quill {
       keyboard: true,
       history: true,
       uploader: true,
+      suggestions: true,
     },
     placeholder: '',
     readOnly: false,
@@ -189,6 +191,7 @@ class Quill {
   clipboard: Clipboard;
   history: History;
   uploader: Uploader;
+  suggestions: Suggestions;
 
   tempFocusHolder: HTMLInputElement;
 

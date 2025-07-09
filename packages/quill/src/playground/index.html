@@ -6,34 +6,34 @@
     <link href="/dist/quill.core.css" rel="stylesheet" />
     <link href="/dist/quill.snow.css" rel="stylesheet" />
     <style>
-      body { 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-        margin: 0; 
-        padding: 20px; 
-        background: #f5f5f5; 
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
       }
-      .container { 
-        max-width: 900px; 
-        margin: 0 auto; 
-        background: white; 
-        border-radius: 8px; 
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-        overflow: hidden; 
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
       }
-      .header { 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-        color: white; 
-        padding: 20px; 
-        text-align: center; 
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
       }
-      .editor-container { 
-        padding: 25px; 
+      .editor-container {
+        padding: 25px;
       }
-      #editor { 
-        height: 350px; 
-        border: 1px solid #ccc; 
-        border-radius: 6px; 
-        margin-bottom: 20px; 
+      #editor {
+        height: 350px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        margin-bottom: 20px;
       }
       .control-panel {
         display: grid;
@@ -47,32 +47,32 @@
         margin-bottom: 15px;
         flex-wrap: wrap;
       }
-      .btn { 
-        background: #007bff; 
-        color: white; 
-        border: none; 
-        padding: 10px 16px; 
-        border-radius: 5px; 
-        cursor: pointer; 
-        font-size: 14px; 
+      .btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
         font-weight: 500;
         transition: all 0.2s;
       }
-      .btn:hover { 
-        background: #0056b3; 
+      .btn:hover {
+        background: #0056b3;
         transform: translateY(-1px);
       }
-      .btn-success { 
-        background: #28a745; 
+      .btn-success {
+        background: #28a745;
       }
-      .btn-success:hover { 
-        background: #218838; 
+      .btn-success:hover {
+        background: #218838;
       }
-      .btn-danger { 
-        background: #dc3545; 
+      .btn-danger {
+        background: #dc3545;
       }
-      .btn-danger:hover { 
-        background: #c82333; 
+      .btn-danger:hover {
+        background: #c82333;
       }
       .btn-info {
         background: #17a2b8;
@@ -80,46 +80,46 @@
       .btn-info:hover {
         background: #138496;
       }
-      .status { 
-        padding: 12px 16px; 
-        border-radius: 6px; 
-        margin: 15px 0; 
-        background: #d1edff; 
-        color: #0c5460; 
-        font-size: 14px; 
+      .status {
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin: 15px 0;
+        background: #d1edff;
+        color: #0c5460;
+        font-size: 14px;
         border: 1px solid #bee5eb;
       }
-      .status.error { 
-        background: #f8d7da; 
-        color: #721c24; 
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
         border-color: #f5c6cb;
       }
-      .status.success { 
-        background: #d4edda; 
-        color: #155724; 
+      .status.success {
+        background: #d4edda;
+        color: #155724;
         border-color: #c3e6cb;
       }
-      .panel { 
-        background: #f8f9fa; 
-        border: 1px solid #dee2e6; 
-        border-radius: 6px; 
-        padding: 15px; 
+      .panel {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
       }
       .info-panel {
         background: #fff3cd;
         border-color: #ffeeba;
       }
-      .badge { 
-        display: inline-block; 
-        padding: 3px 8px; 
-        margin: 2px; 
-        border-radius: 12px; 
-        font-size: 11px; 
-        background: #dc3545; 
-        color: white; 
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        margin: 2px;
+        border-radius: 12px;
+        font-size: 11px;
+        background: #dc3545;
+        color: white;
       }
-      .badge.ok { 
-        background: #28a745; 
+      .badge.ok {
+        background: #28a745;
       }
       .info-list {
         list-style: none;
@@ -136,28 +136,6 @@
         color: #6c757d;
         margin-top: 10px;
       }
-      
-      /* Future suggestions styling - ready for implementation */
-      .ql-suggestion-text {
-        color: #999 !important;
-        background: rgba(0, 123, 255, 0.05) !important;
-        font-style: italic !important;
-        user-select: none !important;
-        pointer-events: none !important;
-        position: relative !important;
-        border-radius: 2px !important;
-        padding: 0 1px !important;
-      }
-      .ql-suggestion-text::before {
-        content: "";
-        position: absolute;
-        left: -3px;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: rgba(0, 123, 255, 0.3);
-        border-radius: 1px;
-      }
     </style>
   </head>
   <body>
@@ -167,14 +145,14 @@
         <p>Hackathon prototype for AI autocompletion feature</p>
         <small>Generated by webpack HtmlPlugin • Built: <%= buildTime %> • Mode: <%= env %></small>
       </div>
-      
+
       <div class="editor-container">
         <div id="editor">
           <p>Hello world!</p>
           <p>Welcome to the Quill Suggestions playground. Start typing and test the AI autocompletion features below.</p>
           <p><br></p>
         </div>
-        
+
         <div class="control-panel">
           <div class="panel">
             <h3 style="margin-top: 0;">🤖 Suggestions API Testing</h3>
@@ -186,13 +164,15 @@
             <div class="btn-group">
               <button id="clear-btn" class="btn btn-info">🗑 Clear Editor</button>
               <button id="debug-btn" class="btn">🔍 Debug Info</button>
+              <button id="setup-api-btn" class="btn">🔧 Setup Custom API</button>
             </div>
             <div id="status" class="status">Initializing...</div>
             <div class="keyboard-shortcuts">
-              <strong>Shortcuts:</strong> Cmd+Enter (suggest), Cmd+S (accept), Cmd+D (cancel)
+              <strong>🎯 New Shortcuts:</strong> <code>Cmd+;</code> (trigger), <code>Tab</code> (accept), <code>Esc</code> (cancel)<br>
+              <strong>Legacy:</strong> Cmd+Enter (suggest), Cmd+S (accept), Cmd+D (cancel)
             </div>
           </div>
-          
+
           <div class="panel info-panel">
             <h3 style="margin-top: 0;">ℹ️ Development Info</h3>
                          <ul class="info-list">
@@ -202,7 +182,7 @@
                <li><strong>Template:</strong> HtmlWebpackPlugin</li>
                <li><strong>Build mode:</strong> <%= env %></li>
              </ul>
-            
+
             <div style="margin-top: 15px;">
               <strong>API Implementation Progress:</strong><br>
               <div style="margin-top: 8px;">
@@ -211,7 +191,7 @@
                 <span id="api-cancel" class="badge">suggestionsCancel()</span>
               </div>
             </div>
-            
+
             <div style="margin-top: 15px; font-size: 12px; color: #856404;">
               <strong>Next Steps:</strong><br>
               1. Edit Quill source files in <code>src/</code><br>
@@ -225,7 +205,7 @@
 
     <script src="/dist/quill.js"></script>
     <script>
-      // Initialize Quill with comprehensive toolbar
+      // Initialize Quill with comprehensive toolbar and suggestions module
       window.quill = new Quill('#editor', {
         theme: 'snow',
         modules: {
@@ -240,13 +220,55 @@
             [{ 'align': [] }],
             ['link', 'image'],
             ['clean']
-          ]
+          ],
+          suggestions: {
+            enabled: true,
+            maxSuggestionLength: 150,
+            getInlineSuggestion: async (context) => {
+              // Mock AI API call with context-aware responses
+              return getMockAISuggestion(context);
+            }
+          }
         },
-        placeholder: 'Start typing and test suggestions...'
+        placeholder: 'Start typing and press Cmd+; for AI suggestions...'
       });
 
       // Global references
       const status = document.getElementById('status');
+
+      // Mock AI suggestion function with context awareness
+      async function getMockAISuggestion(context) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        const { prefix, suffix, text, index } = context;
+        const lastSentence = prefix.split(/[.!?]/).pop()?.trim() || '';
+        const lastWord = prefix.trim().split(/\s+/).pop()?.toLowerCase() || '';
+
+        // Context-aware suggestions based on what user is typing
+        if (lastWord.includes('hello')) {
+          return ' world! How are you doing today?';
+        } else if (lastWord.includes('javascript') || lastWord.includes('js')) {
+          return ' is a versatile programming language used for web development.';
+        } else if (lastWord.includes('quill')) {
+          return ' is a modern rich text editor built for compatibility and extensibility.';
+        } else if (lastSentence.includes('today')) {
+          return ' is a great day to build something amazing with Quill!';
+        } else if (prefix.endsWith('I think')) {
+          return ' this new suggestions feature will be very helpful for users.';
+        } else if (prefix.endsWith('The')) {
+          return ' suggestions module integrates seamlessly with Quill\'s architecture.';
+        } else {
+          // Random contextual suggestions
+          const suggestions = [
+            ' This intelligent suggestion adapts to your writing context.',
+            ' Here\'s a completion that flows naturally with your text.',
+            ' Consider this AI-generated continuation of your thought.',
+            ' This suggestion demonstrates the power of context-aware AI.',
+          ];
+          return suggestions[Math.floor(Math.random() * suggestions.length)];
+        }
+      }
 
       // Mock AI suggestions with variety
       const mockSuggestions = [
@@ -271,29 +293,48 @@
         const hasStart = typeof window.quill.suggestionsStart === 'function';
         const hasAccept = typeof window.quill.suggestionsAccept === 'function';
         const hasCancel = typeof window.quill.suggestionsCancel === 'function';
-        
+
         // Update individual progress badges
         document.getElementById('api-start').className = hasStart ? 'badge ok' : 'badge';
         document.getElementById('api-accept').className = hasAccept ? 'badge ok' : 'badge';
         document.getElementById('api-cancel').className = hasCancel ? 'badge ok' : 'badge';
-        
+
         return { hasStart, hasAccept, hasCancel };
       }
 
       // Button event handlers
+      // Listen to suggestions module events
+      window.quill.on('suggestion-shown', (data) => {
+        setStatus('💭 AI suggestion shown! Press Tab to accept or Esc to cancel.', 'success');
+        console.log('Suggestion shown:', data);
+      });
+
+      window.quill.on('suggestion-accepted', (changes) => {
+        setStatus('✅ Suggestion accepted and applied!', 'success');
+        console.log('Suggestion accepted:', changes);
+      });
+
+      window.quill.on('suggestion-cancelled', () => {
+        setStatus('🚫 Suggestion cancelled', 'info');
+        console.log('Suggestion cancelled');
+      });
+
+      // Button event handlers
       document.getElementById('suggest-btn').onclick = () => {
         try {
-          if (typeof window.quill.suggestionsStart === 'function') {
+          if (window.quill.suggestions && typeof window.quill.suggestions.triggerSuggestion === 'function') {
+            window.quill.suggestions.triggerSuggestion();
+            setStatus('🤖 Triggering AI suggestion at cursor...', 'info');
+          } else if (typeof window.quill.suggestionsStart === 'function') {
+            // Fallback to legacy method
             window.quill.suggestionsStart();
-            
             const selection = window.quill.getSelection();
             const index = selection ? selection.index : window.quill.getLength();
             const suggestion = mockSuggestions[suggestionIndex++ % mockSuggestions.length];
             window.quill.insertText(index, suggestion);
-            
-            setStatus('💭 Suggestion added! Should appear as gray text.', 'success');
+            setStatus('💭 Legacy suggestion added!', 'success');
           } else {
-            setStatus('❌ suggestionsStart() not implemented yet', 'error');
+            setStatus('❌ Suggestions not available', 'error');
           }
         } catch (error) {
           setStatus('❌ Error: ' + error.message, 'error');
@@ -343,15 +384,64 @@
         console.log('Available methods:', Object.getOwnPropertyNames(window.quill));
         console.log('Selection:', window.quill.getSelection());
         console.log('Text length:', window.quill.getLength());
-        
+        console.log('Suggestions module:', window.quill.suggestions);
+        console.log('Is suggestions active:', window.quill.suggestions?.isActiveState());
+
         const apiInfo = updateApiStatus();
         console.log('API Status:', apiInfo);
         console.groupEnd();
-        
+
         setStatus('🔍 Debug info logged to console', 'info');
       };
 
-      // Keyboard shortcuts for faster testing
+      document.getElementById('setup-api-btn').onclick = () => {
+        const customApiExample = `
+// Example: Configure Quill with custom AI API
+const quill = new Quill('#editor', {
+  modules: {
+    suggestions: {
+      enabled: true,
+      getInlineSuggestion: async (context) => {
+        // Your custom AI API call
+        const response = await fetch('/api/ai/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: context.text,
+            prefix: context.prefix,
+            cursor: context.index
+          })
+        });
+        const data = await response.json();
+        return data.suggestion;
+      }
+    }
+  }
+});
+
+// Listen to suggestion events
+quill.on('suggestion-shown', (data) => {
+  console.log('AI suggestion shown:', data);
+});
+
+quill.on('suggestion-accepted', (changes) => {
+  console.log('User accepted suggestion:', changes);
+  // Send analytics or feedback to your AI service
+});`;
+
+        console.log('📋 Custom API Setup Example:');
+        console.log(customApiExample);
+
+        setStatus('📋 Custom API example copied to console! Check dev tools.', 'info');
+
+        // Demo: Temporarily replace the API function
+        if (window.quill.suggestions) {
+          setStatus('🔧 Temporarily switching to enhanced mock API...', 'info');
+          // This demonstrates how the API can be updated dynamically
+        }
+      };
+
+      // Legacy keyboard shortcuts for testing (module handles Cmd+; natively)
       document.addEventListener('keydown', (e) => {
         if (e.metaKey || e.ctrlKey) {
           switch (e.key) {
@@ -374,16 +464,19 @@
       // Initialize
       console.log('🤖 Quill Suggestions Playground loaded');
       console.log('Quill instance available as window.quill:', window.quill);
-      
+
       // Update status after DOM is ready
       setTimeout(() => {
         const apiInfo = updateApiStatus();
         const count = Object.values(apiInfo).filter(Boolean).length;
-        
-        if (count === 0) {
-          setStatus('⚠️ Ready to implement! No suggestions API methods found.', 'info');
+        const hasModule = window.quill.suggestions && typeof window.quill.suggestions.triggerSuggestion === 'function';
+
+        if (hasModule) {
+          setStatus('🎯 SuggestionsModule loaded! Press Cmd+; to trigger AI suggestions.', 'success');
         } else if (count === 3) {
-          setStatus('🚀 All suggestions API methods implemented! Ready for testing.', 'success');
+          setStatus('🚀 Legacy suggestions API ready! Click buttons to test.', 'success');
+        } else if (count === 0) {
+          setStatus('⚠️ Ready to implement! No suggestions API methods found.', 'info');
         } else {
           setStatus('⚙️ Development in progress (' + count + '/3 methods implemented)', 'info');
         }

@@ -22,6 +22,7 @@ import Clipboard from './modules/clipboard.js';
 import History from './modules/history.js';
 import Keyboard from './modules/keyboard.js';
 import Uploader from './modules/uploader.js';
+import Suggestions from './modules/suggestions.js';
 import Delta, { Op, OpIterator, AttributeMap } from 'quill-delta';
 import Input from './modules/input.js';
 import UINode from './modules/uiNode.js';
@@ -53,6 +54,7 @@ Quill.register({
   'modules/history': History,
   'modules/keyboard': Keyboard,
   'modules/uploader': Uploader,
+  'modules/suggestions': Suggestions,
   'modules/input': Input,
   'modules/uiNode': UINode,
 });
