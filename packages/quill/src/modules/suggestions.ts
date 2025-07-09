@@ -8,24 +8,6 @@ export interface SuggestionsOptions {
    * Should return a Promise that resolves to suggestion text or null
    */
   getInlineSuggestion?: (context: SuggestionContext) => Promise<string | null>;
-
-  /**
-   * Enable/disable the suggestions module
-   * @default true
-   */
-  enabled?: boolean;
-
-  /**
-   * Debounce delay for automatic suggestions (ms)
-   * @default 300
-   */
-  debounceDelay?: number;
-
-  /**
-   * Maximum length for suggestions
-   * @default 200
-   */
-  maxSuggestionLength?: number;
 }
 
 export interface SuggestionContext {
@@ -45,9 +27,6 @@ export interface SuggestionContext {
 
 class Suggestions extends Module<SuggestionsOptions> {
   static DEFAULTS: SuggestionsOptions = {
-    enabled: true,
-    debounceDelay: 300,
-    maxSuggestionLength: 200,
     getInlineSuggestion: undefined,
   };
 
@@ -55,8 +34,6 @@ class Suggestions extends Module<SuggestionsOptions> {
 
   constructor(quill: Quill, options: Partial<SuggestionsOptions>) {
     super(quill, options);
-
-    if (!this.options.enabled) return;
 
     this.setupKeyboardBindings();
     this.setupEventListeners();
@@ -71,11 +48,11 @@ class Suggestions extends Module<SuggestionsOptions> {
 
     // Add our tab handler first - it will handle suggestions or pass through to default
     const keyboard = this.quill.getModule('keyboard') as any;
-    
+
     // Create our tab handler
     const ourTabHandler = {
       key: 'Tab',
-      handler: (range: Range, context: any) => {
+      handler: () => {
         // Handle suggestions first
         if (this.isActive) {
           this.acceptSuggestion();
@@ -90,12 +67,12 @@ class Suggestions extends Module<SuggestionsOptions> {
     // Ensure our handler runs first by prepending to the bindings array
     if (!keyboard.bindings) keyboard.bindings = {};
     if (!keyboard.bindings['Tab']) keyboard.bindings['Tab'] = [];
-    
+
     // Insert our handler at the beginning
     keyboard.bindings['Tab'].unshift(ourTabHandler);
 
     // Escape to cancel suggestions
-    this.quill.keyboard.addBinding({ key: 'Escape' }, (range: Range) => {
+    this.quill.keyboard.addBinding({ key: 'Escape' }, () => {
       if (this.isActive) {
         this.cancelSuggestion();
         return false; // Prevent default escape behavior
@@ -107,7 +84,7 @@ class Suggestions extends Module<SuggestionsOptions> {
     // Listen for selection changes to auto-cancel suggestions
     this.quill.on(
       Quill.events.SELECTION_CHANGE,
-      (range: Range | null, oldRange: Range | null, source: string) => {
+      (range: Range | null, oldRange: Range | null) => {
         if (this.isActive && range && oldRange) {
           // Cancel suggestions if cursor moves away from suggestion area
           if (range.index !== oldRange.index) {
@@ -122,8 +99,6 @@ class Suggestions extends Module<SuggestionsOptions> {
    * Trigger inline suggestion at current cursor position
    */
   async triggerSuggestion(): Promise<void> {
-    if (!this.options.enabled) return;
-
     // Get current range first, before any cancellation
     const range = this.quill.getSelection();
     if (!range || range.length > 0) return; // Only work with collapsed selection
@@ -226,14 +201,6 @@ class Suggestions extends Module<SuggestionsOptions> {
   }
 
   private showSuggestion(text: string, index: number): void {
-    // Truncate if too long
-    if (
-      this.options.maxSuggestionLength &&
-      text.length > this.options.maxSuggestionLength
-    ) {
-      text = text.substring(0, this.options.maxSuggestionLength) + '...';
-    }
-
     // Use Quill's built-in suggestions API
     this.quill.suggestionsStart();
     this.quill.insertText(index, text);
