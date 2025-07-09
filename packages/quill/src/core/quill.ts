@@ -873,24 +873,15 @@ class Quill {
   }
 
   private removeSuggestionBlots(): void {
-    const currentDelta = this.getContents();
-    const cleanDelta = new Delta();
+    // Use the blot-based approach instead of Delta manipulation
+    // to avoid cursor position issues
+    const suggestionBlots = this.scroll.descendants(
+      (blot: any) => blot.statics.className === 'ql-suggestion-text',
+    );
 
-    // Remove all text with suggestion formatting
-    currentDelta.ops.forEach((op) => {
-      if (
-        op.insert &&
-        typeof op.insert === 'string' &&
-        op.attributes &&
-        op.attributes['suggestion-text']
-      ) {
-        // Skip this text (remove it)
-      } else {
-        cleanDelta.push(op);
-      }
+    suggestionBlots.forEach((blot: any) => {
+      blot.remove();
     });
-
-    this.setContents(cleanDelta, Emitter.sources.SILENT);
   }
 }
 
