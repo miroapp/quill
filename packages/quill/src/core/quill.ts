@@ -828,7 +828,7 @@ class Quill {
         Emitter.events.TEXT_CHANGE,
         changes,
         this.primaryDelta,
-        Emitter.sources.API,
+        Emitter.sources.USER,
       );
     }
 
@@ -857,7 +857,7 @@ class Quill {
     // Get the first suggestion blot to work with
     const firstSuggestionBlot = suggestionBlots[0] as any;
     const suggestionText = firstSuggestionBlot.domNode.textContent || '';
-    
+
     // Extract first word (including leading space if present)
     const match = suggestionText.match(/^(\s*\S+)/);
     if (!match) return new Delta();
@@ -867,13 +867,13 @@ class Quill {
 
     // Get the position of the suggestion in the document
     const suggestionIndex = this.getIndex(firstSuggestionBlot);
-    
+
     // Remove the entire suggestion blot first
     firstSuggestionBlot.remove();
 
     // Insert the first word as permanent text
     const changes = new Delta().retain(suggestionIndex).insert(firstWord);
-    
+
     // If there's remaining text, insert it as a new suggestion
     if (remainingText.trim()) {
       this.insertText(suggestionIndex + firstWord.length, remainingText, {
@@ -895,15 +895,15 @@ class Quill {
         Emitter.events.TEXT_CHANGE,
         changes,
         this.primaryDelta,
-        Emitter.sources.API,
+        Emitter.sources.USER,
       );
     }
 
     // Emit custom event for partial acceptance
-    this.emitter.emit('suggestion-partial-accepted', { 
+    this.emitter.emit('suggestion-partial-accepted', {
       acceptedText: firstWord,
       remainingText: remainingText.trim(),
-      position: suggestionIndex 
+      position: suggestionIndex,
     });
 
     return changes;
