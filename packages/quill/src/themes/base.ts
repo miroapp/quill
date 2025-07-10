@@ -12,6 +12,7 @@ import type Clipboard from '../modules/clipboard.js';
 import type History from '../modules/history.js';
 import type Keyboard from '../modules/keyboard.js';
 import type Uploader from '../modules/uploader.js';
+import type Suggestions from '../modules/suggestions.js';
 import type Selection from '../core/selection.js';
 
 const ALIGNS = [false, 'center', 'right', 'justify'];
@@ -97,6 +98,7 @@ class BaseTheme extends Theme {
   addModule(name: 'keyboard'): Keyboard;
   addModule(name: 'uploader'): Uploader;
   addModule(name: 'history'): History;
+  addModule(name: 'suggestions'): Suggestions;
   addModule(name: 'selection'): Selection;
   addModule(name: string): unknown;
   addModule(name: string) {

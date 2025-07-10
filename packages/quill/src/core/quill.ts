@@ -236,6 +236,7 @@ class Quill {
     this.clipboard = this.theme.addModule('clipboard');
     this.history = this.theme.addModule('history');
     this.uploader = this.theme.addModule('uploader');
+    this.suggestions = this.theme.addModule('suggestions');
     this.theme.addModule('input');
     this.theme.addModule('uiNode');
     this.theme.init();
@@ -841,6 +842,71 @@ class Quill {
     this.scroll.batchEnd();
     this.container.classList.remove('ql-suggestions-mode');
     this.isSuggestionsMode = false;
+  }
+
+  suggestionsAcceptFirstWord(): Delta {
+    if (!this.isSuggestionsMode) return new Delta();
+
+    // Find suggestion blots and extract the first word
+    const suggestionBlots = this.scroll.descendants(
+      (blot: any) => blot.statics.className === 'ql-suggestion-text',
+    );
+
+    if (suggestionBlots.length === 0) return new Delta();
+
+    // Get the first suggestion blot to work with
+    const firstSuggestionBlot = suggestionBlots[0] as any;
+    const suggestionText = firstSuggestionBlot.domNode.textContent || '';
+    
+    // Extract first word (including leading space if present)
+    const match = suggestionText.match(/^(\s*\S+)/);
+    if (!match) return new Delta();
+
+    const firstWord = match[1];
+    const remainingText = suggestionText.slice(firstWord.length);
+
+    // Get the position of the suggestion in the document
+    const suggestionIndex = this.getIndex(firstSuggestionBlot);
+    
+    // Remove the entire suggestion blot first
+    firstSuggestionBlot.remove();
+
+    // Insert the first word as permanent text
+    const changes = new Delta().retain(suggestionIndex).insert(firstWord);
+    
+    // If there's remaining text, insert it as a new suggestion
+    if (remainingText.trim()) {
+      this.insertText(suggestionIndex + firstWord.length, remainingText, {
+        'suggestion-text': true,
+      });
+    } else {
+      // No more suggestion text, exit suggestions mode
+      this.scroll.batchEnd();
+      this.container.classList.remove('ql-suggestions-mode');
+      this.isSuggestionsMode = false;
+    }
+
+    // Position cursor after the accepted word
+    this.setSelection(suggestionIndex + firstWord.length, 0);
+
+    // Emit the change
+    if (changes.length() > 0) {
+      this.emitter.emit(
+        Emitter.events.TEXT_CHANGE,
+        changes,
+        this.primaryDelta,
+        Emitter.sources.API,
+      );
+    }
+
+    // Emit custom event for partial acceptance
+    this.emitter.emit('suggestion-partial-accepted', { 
+      acceptedText: firstWord,
+      remainingText: remainingText.trim(),
+      position: suggestionIndex 
+    });
+
+    return changes;
   }
 
   private convertSuggestionsToText(): Delta {
