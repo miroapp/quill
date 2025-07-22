@@ -80,15 +80,15 @@ class Block extends BlockBlot {
         });
       } else {
         softLines.forEach((str) => {
-          const insertIndex = this.children.tail.length();
+          const insertIndex = this.children.tail!.length();
           if (str === SOFT_BREAK_CHARACTER) {
-            this.children.tail.insertAt(
+            this.children.tail!.insertAt(
               insertIndex,
               SoftBreak.blotName,
               SOFT_BREAK_CHARACTER,
             );
           } else {
-            this.children.tail.insertAt(insertIndex, str);
+            this.children.tail!.insertAt(insertIndex, str);
           }
         });
       }

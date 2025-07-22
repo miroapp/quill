@@ -184,8 +184,8 @@ describe('Editor', () => {
       expect(editor.getDelta()).toEqual(
         new Delta().insert(`01245${SOFT_BREAK_CHARACTER}673`).insert('\n'),
       );
-      expect(editor.scroll.domnode).toEqualHtml(`
-        <p>0245<br class="soft-break">673</p>`);
+      expect(editor.scroll.domNode).toEqualHTML(`
+        <p>01245<br class="soft-break">673</p>`);
     });
 
     test('append soft line break', () => {
