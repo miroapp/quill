@@ -178,6 +178,16 @@ describe('Editor', () => {
         <p><strong>012<br class="soft-break">3</strong></p>`);
     });
 
+    test('insert soft line break near the end', () => {
+      const editor = createEditor('<p>0123</p>');
+      editor.insertText(3, `45${SOFT_BREAK_CHARACTER}67`);
+      expect(editor.getDelta()).toEqual(
+        new Delta().insert(`01245${SOFT_BREAK_CHARACTER}673`).insert('\n'),
+      );
+      expect(editor.scroll.domnode).toEqualHtml(`
+        <p>0245<br class="soft-break">673</p>`);
+    });
+
     test('append soft line break', () => {
       const editor = createEditor('<ol><li data-list="bullet">0123</li></ol>');
       editor.insertText(4, SOFT_BREAK_CHARACTER);

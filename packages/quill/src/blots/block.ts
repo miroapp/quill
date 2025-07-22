@@ -62,10 +62,11 @@ class Block extends BlockBlot {
     const text = lines.shift() as string;
     if (text.length > 0) {
       const softLines = text.split(softBreakRegex);
-      let i = index;
-      softLines.forEach((str) => {
-        if (i < this.length() - 1 || this.children.tail == null) {
-          const insertIndex = Math.min(i, this.length() - 1);
+      if (index < this.length() - 1 || this.children.tail == null) {
+        let i = index;
+        softLines.forEach((str) => {
+          const addedChars = i - index;
+          const insertIndex = Math.min(i, this.length() - 1 + addedChars);
           if (str === SOFT_BREAK_CHARACTER) {
             super.insertAt(
               insertIndex,
@@ -75,7 +76,10 @@ class Block extends BlockBlot {
           } else {
             super.insertAt(insertIndex, str);
           }
-        } else {
+          i += str.length;
+        });
+      } else {
+        softLines.forEach((str) => {
           const insertIndex = this.children.tail.length();
           if (str === SOFT_BREAK_CHARACTER) {
             this.children.tail.insertAt(
@@ -86,9 +90,8 @@ class Block extends BlockBlot {
           } else {
             this.children.tail.insertAt(insertIndex, str);
           }
-        }
-        i += str.length;
-      });
+        });
+      }
 
       this.cache = {};
     }
