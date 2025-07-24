@@ -62,23 +62,8 @@ class Block extends BlockBlot {
     const text = lines.shift() as string;
     if (text.length > 0) {
       const softLines = text.split(softBreakRegex);
-      if (index < this.length() - 1 || this.children.tail == null) {
-        let i = index;
-        softLines.forEach((str) => {
-          const addedChars = i - index;
-          const insertIndex = Math.min(i, this.length() - 1 + addedChars);
-          if (str === SOFT_BREAK_CHARACTER) {
-            super.insertAt(
-              insertIndex,
-              SoftBreak.blotName,
-              SOFT_BREAK_CHARACTER,
-            );
-          } else {
-            super.insertAt(insertIndex, str);
-          }
-          i += str.length;
-        });
-      } else {
+      // inserting at the end of a non-empty block
+      if (index >= this.length() - 1 && this.children.tail != null) {
         softLines.forEach((str) => {
           const insertIndex = this.children.tail!.length();
           if (str === SOFT_BREAK_CHARACTER) {
@@ -90,6 +75,21 @@ class Block extends BlockBlot {
           } else {
             this.children.tail!.insertAt(insertIndex, str);
           }
+        });
+        // inserting in an empty block or before the end of a non-empty block
+      } else {
+        let insertIndex = index;
+        softLines.forEach((str) => {
+          if (str === SOFT_BREAK_CHARACTER) {
+            super.insertAt(
+              insertIndex,
+              SoftBreak.blotName,
+              SOFT_BREAK_CHARACTER,
+            );
+          } else {
+            super.insertAt(insertIndex, str);
+          }
+          insertIndex += str.length;
         });
       }
 

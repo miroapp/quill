@@ -188,6 +188,33 @@ describe('Editor', () => {
         <p>01245<br class="soft-break">673</p>`);
     });
 
+    test('insert soft line break before tail with format', () => {
+      const editor = createEditor('<p>012<strong>3</strong></p>');
+      editor.insertText(3, `45${SOFT_BREAK_CHARACTER}67`);
+      expect(editor.getDelta()).toEqual(
+        new Delta()
+          .insert('012')
+          .insert(`45${SOFT_BREAK_CHARACTER}673`, { bold: true })
+          .insert('\n'),
+      );
+      expect(editor.scroll.domNode).toEqualHTML(`
+    <p>012<strong>45<br class="soft-break">673</strong></p>`);
+    });
+
+    test('insert soft line break before tail with nested format', () => {
+      const editor = createEditor('<p>01<strong>2<em>3</em></strong></p>');
+      editor.insertText(3, `45${SOFT_BREAK_CHARACTER}67`);
+      expect(editor.getDelta()).toEqual(
+        new Delta()
+          .insert('01')
+          .insert('2', { bold: true })
+          .insert(`45${SOFT_BREAK_CHARACTER}673`, { bold: true, italic: true })
+          .insert('\n'),
+      );
+      expect(editor.scroll.domNode).toEqualHTML(`
+    <p>01<strong>2<em>45<br class="soft-break">673</strong></em></p>`);
+    });
+
     test('append soft line break', () => {
       const editor = createEditor('<ol><li data-list="bullet">0123</li></ol>');
       editor.insertText(4, SOFT_BREAK_CHARACTER);
