@@ -16,6 +16,26 @@
   <body>
     <div id="root">
       <div id="standalone-container">
+        <style>
+          /* Custom styling for callout buttons to blend with Snow toolbar */
+          .ql-snow .ql-toolbar .ql-callout-formats {
+            margin-left: 8px;
+          }
+          .ql-snow .ql-toolbar .ql-callout-formats button {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: #fff;
+            padding: 3px 8px;
+            margin: 0 2px;
+            font-size: 12px;
+            line-height: 1;
+            height: 26px;
+            cursor: pointer;
+          }
+          .ql-snow .ql-toolbar .ql-callout-formats button:hover {
+            background: #f7f7f7;
+          }
+        </style>
         <div id="toolbar-container">
           <span class="ql-formats">
             <select class="ql-font"></select>
@@ -60,14 +80,328 @@
           <span class="ql-formats">
             <button class="ql-clean"></button>
           </span>
+          <span class="ql-formats ql-callout-formats">
+            <button id="ql-insert-callout" type="button">Callout</button>
+            <button id="ql-type-callout" type="button">Type</button>
+            <button id="ql-clear-callout" type="button">Clear</button>
+            <button id="ql-color-callout" type="button">Color</button>
+            <button id="ql-icon-callout" type="button">Icon</button>
+          </span>
         </div>
         <div id="editor" style="height: 350px"></div>
         <script>
           window.quill = new Quill(document.getElementById('editor'), {
             modules: { syntax: true, toolbar: '#toolbar-container' },
-            placeholder: 'Compose an epic...',
+            placeholder: 'Type some text and try the callout buttons...',
             theme: 'snow',
           });
+          
+          // Add some test content
+          window.quill.setText('This is a test line for callouts\nAnother line to test\nA third line for more testing\n');
+        </script>
+        <script type="module">
+          // 1) Register three separate attributors
+          const Parchment = window.Quill.import('parchment');
+          const { Attributor } = Parchment;
+          const CALLOUT_KEY = 'callout';
+          const CALLOUT_COLOR_KEY = 'callout-color';
+          const CALLOUT_ICON_KEY = 'callout-icon';
+
+          const CalloutType = new Attributor(CALLOUT_KEY, 'data-callout', { scope: Parchment.Scope.BLOCK });
+          const CalloutColor = new Attributor(CALLOUT_COLOR_KEY, 'data-callout-color', { scope: Parchment.Scope.BLOCK });
+          const CalloutIcon = new Attributor(CALLOUT_ICON_KEY, 'data-callout-icon', { scope: Parchment.Scope.BLOCK });
+          
+          // Register individually with specific paths
+          window.Quill.register(`formats/${CALLOUT_KEY}`, CalloutType, true);
+          window.Quill.register(`formats/${CALLOUT_COLOR_KEY}`, CalloutColor, true);
+          window.Quill.register(`formats/${CALLOUT_ICON_KEY}`, CalloutIcon, true);
+          
+          // Debug: Verify registration
+          console.log('Registered callout attributors successfully');
+          console.log('Quill imports check:', {
+            callout: window.Quill.imports[`formats/${CALLOUT_KEY}`],
+            calloutColor: window.Quill.imports[`formats/${CALLOUT_COLOR_KEY}`],
+            calloutIcon: window.Quill.imports[`formats/${CALLOUT_ICON_KEY}`]
+          });
+          console.log('Direct attributor check:', { CalloutType, CalloutColor, CalloutIcon });
+
+          // 2) Presets
+          const CALLOUT_PRESETS = {
+            general: { label: 'General', color: '#E0E0E0', icon: '🙂' },
+            info:    { label: 'Info',    color: '#CFE2FF', icon: 'ℹ️' },
+            warning: { label: 'Warning', color: '#FFD59E', icon: '⚠️' },
+            error:   { label: 'Error',   color: '#FFC1C1', icon: '❗' },
+            success: { label: 'Success', color: '#CDEECC', icon: '✅' },
+          };
+          const DEFAULT_TYPE = 'general';
+          const DEFAULT_COLOR = CALLOUT_PRESETS[DEFAULT_TYPE].color;
+          const DEFAULT_ICON = CALLOUT_PRESETS[DEFAULT_TYPE].icon;
+
+          // 3) Helpers
+          function getLineCallout(line) {
+            const fmts = line.formats?.() ?? {};
+            console.log('getLineCallout - Line formats:', fmts);
+            const type = fmts[CALLOUT_KEY];
+            const color = fmts[CALLOUT_COLOR_KEY];
+            const icon = fmts[CALLOUT_ICON_KEY];
+            if (!type) return undefined;
+            const result = { type, color, icon };
+            console.log('getLineCallout - Returning:', result);
+            return result;
+          }
+
+          function formatCalloutRange(quill, index, length, type, color, icon) {
+            const attrs = { 
+              [CALLOUT_KEY]: type, 
+              [CALLOUT_COLOR_KEY]: color, 
+              [CALLOUT_ICON_KEY]: icon 
+            };
+            console.log('formatCalloutRange - Applying attributes:', attrs, 'at index:', index, 'length:', length);
+            
+            // Check if Quill recognizes these attributes
+            console.log('formatCalloutRange - Quill scroll query:', {
+              callout: quill.scroll.query(CALLOUT_KEY),
+              calloutColor: quill.scroll.query(CALLOUT_COLOR_KEY),
+              calloutIcon: quill.scroll.query(CALLOUT_ICON_KEY)
+            });
+            
+            quill.formatLine(index, length, attrs, 'user');
+            
+            // Check what was actually applied
+            setTimeout(() => {
+              const lines = quill.getLines(index, length);
+              console.log('formatCalloutRange - Lines after formatting:', lines.map(line => line.formats()));
+            }, 10);
+          }
+
+          function clearCalloutRange(quill, index, length) {
+            quill.formatLine(index, length, { 
+              [CALLOUT_KEY]: null, 
+              [CALLOUT_COLOR_KEY]: null, 
+              [CALLOUT_ICON_KEY]: null 
+            }, 'user');
+          }
+
+          // 4) ENTER behavior
+          function installEnterHandler(quill) {
+            const ENTER = 13;
+            quill.keyboard.bindings[ENTER]?.unshift({
+              key: ENTER,
+              shiftKey: false,
+              handler: (range, ctx) => {
+                if (ctx.format[CALLOUT_KEY] != null && ctx.empty) {
+                  clearCalloutRange(quill, range.index, 1);
+                  return false;
+                }
+                return true;
+              },
+            });
+          }
+
+          // 5) CalloutsManager (separate attributes approach)
+          class CalloutsManager {
+            constructor(quill) {
+              this.quill = quill;
+              this.container = quill.addContainer('quill-callouts');
+              Object.assign(this.container.style, { 
+                position: 'absolute', 
+                pointerEvents: 'none', 
+                top: '0px', 
+                left: '0px',
+                zIndex: '-1' // Put background behind the text
+              });
+              quill.on('text-change', () => this.update());
+              this.update();
+            }
+
+            update() {
+              console.log('CalloutsManager.update() called');
+              this.container.innerHTML = '';
+              const lines = this.quill.getLines();
+              console.log('CalloutsManager.update() - Total lines:', lines.length);
+              
+              // Group contiguous lines by (type, color, icon) triple
+              const groups = [];
+              let current = null;
+              
+              lines.forEach((line, idx) => {
+                // Reset margins
+                if (line.domNode?.style) {
+                  line.domNode.style.marginLeft = '0px';
+                }
+                
+                const c = getLineCallout(line);
+                console.log(`CalloutsManager.update() - Line ${idx}:`, c);
+                if (!c) {
+                  current && groups.push(current);
+                  current = null;
+                  return;
+                }
+                
+                if (current && current.type === c.type && current.icon === c.icon && current.color === c.color) {
+                  current.end = idx;
+                  current.lines.push(line);
+                } else {
+                  current && groups.push(current);
+                  current = { type: c.type, icon: c.icon, color: c.color, start: idx, end: idx, lines: [line] };
+                }
+              });
+              current && groups.push(current);
+              console.log('CalloutsManager.update() - Found callout groups:', groups.length);
+              
+              const containerRect = this.quill.container.getBoundingClientRect();
+              
+              groups.forEach(g => {
+                // Apply margin to first line
+                if (g.lines[0]?.domNode?.style) {
+                  g.lines[0].domNode.style.marginLeft = '36px';
+                }
+                
+                const rects = g.lines.map(ln => ln.domNode.getBoundingClientRect());
+                const bounds = rects.reduce((b, r) => ({
+                  top: Math.min(b.top, r.top),
+                  left: Math.min(b.left, r.left),
+                  right: Math.max(b.right, r.right),
+                  bottom: Math.max(b.bottom, r.bottom),
+                }), { top: Infinity, left: Infinity, right: -Infinity, bottom: -Infinity });
+                
+                const x = bounds.left - containerRect.left;
+                const y = bounds.top - containerRect.top;
+                const width = bounds.right - bounds.left;
+                const height = bounds.bottom - bounds.top;
+                
+                const wrapper = document.createElement('div');
+                Object.assign(wrapper.style, { 
+                  position: 'absolute', 
+                  left: `${x}px`, 
+                  top: `${y}px`, 
+                  width: `${width}px`, 
+                  height: `${height}px` 
+                });
+                
+                const bg = document.createElement('div');
+                Object.assign(bg.style, {
+                  position: 'absolute', 
+                  inset: '0', 
+                  borderRadius: '4px',
+                  background: g.color || '#FFF7CC', 
+                  border: `1px solid ${g.color || '#FFF7CC'}`,
+                });
+                
+                const iconWrap = document.createElement('div');
+                Object.assign(iconWrap.style, { 
+                  position: 'absolute', 
+                  width: '36px', 
+                  display: 'flex', 
+                  alignItems: 'flex-start', 
+                  justifyContent: 'center',
+                  zIndex: '1' // Keep icon above background
+                });
+                
+                const icon = document.createElement('span');
+                icon.textContent = g.icon || '💡';
+                Object.assign(icon.style, { 
+                  pointerEvents: 'all', 
+                  cursor: 'pointer', 
+                  marginTop: '4px',
+                  zIndex: '2' // Ensure icon is clickable and visible
+                });
+                
+                icon.addEventListener('click', () => {
+                  const newIcon = prompt('Icon (emoji)') || g.icon;
+                  const groupStart = this.quill.getIndex(g.lines[0]);
+                  const len = g.lines.reduce((acc, ln) => acc + ln.length(), 0);
+                  formatCalloutRange(this.quill, groupStart, len, g.type, g.color, newIcon);
+                });
+                
+                iconWrap.appendChild(icon);
+                wrapper.appendChild(bg);
+                wrapper.appendChild(iconWrap);
+                this.container.appendChild(wrapper);
+              });
+            }
+          }
+
+          // 6) Toolbar helpers
+          function withSelectionLines(quill, fn) {
+            const range = quill.getSelection(true);
+            if (!range) return;
+            const lines = quill.getLines(range.index, range.length);
+            if (lines.length === 0) return;
+            const startIndex = quill.getIndex(lines[0]);
+            const totalLength = lines.reduce((sum, line) => sum + line.length(), 0);
+            fn(startIndex, Math.max(totalLength, 1));
+          }
+
+          function insertCallout(quill) {
+            console.log('insertCallout called');
+            withSelectionLines(quill, (i, l) => {
+              console.log('insertCallout - About to format lines at index:', i, 'length:', l);
+              formatCalloutRange(quill, i, l, DEFAULT_TYPE, DEFAULT_COLOR, DEFAULT_ICON);
+              // Manual trigger since formatLine might not trigger text-change
+              setTimeout(() => {
+                console.log('insertCallout - Manually triggering CalloutsManager update');
+                window.calloutsManager?.update();
+              }, 50);
+            });
+          }
+
+          function clearCallout(quill) {
+            withSelectionLines(quill, (i, l) => {
+              clearCalloutRange(quill, i, l);
+            });
+          }
+
+          function setPresetType(quill) {
+            const choice = (prompt('Type (general|info|warning|error|success):', DEFAULT_TYPE) || DEFAULT_TYPE).toLowerCase();
+            if (!CALLOUT_PRESETS[choice]) return;
+            
+            withSelectionLines(quill, (i, l) => {
+              const { color, icon } = CALLOUT_PRESETS[choice];
+              formatCalloutRange(quill, i, l, choice, color, icon);
+            });
+          }
+
+          function setCalloutColor(quill) {
+            withSelectionLines(quill, (i, l) => {
+              const lines = quill.getLines(i, l);
+              const firstLine = lines[0];
+              const existing = getLineCallout(firstLine);
+              const type = existing?.type || DEFAULT_TYPE;
+              const icon = existing?.icon || DEFAULT_ICON;
+              const newColor = prompt('Color (hex, e.g. #CFE2FF):', existing?.color || DEFAULT_COLOR);
+              if (!newColor) return;
+              formatCalloutRange(quill, i, l, type, newColor, icon);
+            });
+          }
+
+          function setCalloutIcon(quill) {
+            withSelectionLines(quill, (i, l) => {
+              const lines = quill.getLines(i, l);
+              const firstLine = lines[0];
+              const existing = getLineCallout(firstLine);
+              const type = existing?.type || DEFAULT_TYPE;
+              const color = existing?.color || DEFAULT_COLOR;
+              const newIcon = prompt('Icon (emoji):', existing?.icon || DEFAULT_ICON) || existing?.icon || DEFAULT_ICON;
+              formatCalloutRange(quill, i, l, type, color, newIcon);
+            });
+          }
+
+          // Bind toolbar buttons
+          installEnterHandler(window.quill);
+          const mgr = new CalloutsManager(window.quill);
+          window.calloutsManager = mgr; // Make globally accessible
+          
+          const insertButton = document.getElementById('ql-insert-callout');
+          console.log('Callout button found:', !!insertButton);
+          insertButton?.addEventListener('click', () => {
+            console.log('Callout button clicked!');
+            insertCallout(window.quill);
+          });
+          document.getElementById('ql-type-callout')?.addEventListener('click', () => setPresetType(window.quill));
+          document.getElementById('ql-clear-callout')?.addEventListener('click', () => clearCallout(window.quill));
+          document.getElementById('ql-color-callout')?.addEventListener('click', () => setCalloutColor(window.quill));
+          document.getElementById('ql-icon-callout')?.addEventListener('click', () => setCalloutIcon(window.quill));
         </script>
       </div>
     </div>
