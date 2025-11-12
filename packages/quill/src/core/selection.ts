@@ -142,7 +142,7 @@ class Selection {
               this.setRange({ index: this.scroll.length(), length: 0 });
             }
           }
-        }, 10);
+        }, 1);
       }
     });
   }
