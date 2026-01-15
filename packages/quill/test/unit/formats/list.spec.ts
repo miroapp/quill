@@ -34,7 +34,7 @@ describe('List', () => {
     expect(editor.scroll.domNode).toEqualHTML(`
       <p>0123</p>
       <ol>
-        <li data-list="ordered">5678</li>
+        <li role="listitem" data-list="ordered">5678</li>
       </ol>
       <p>0123</p>
     `);
@@ -63,8 +63,8 @@ describe('List', () => {
     );
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="checked">0123</li>
-        <li data-list="unchecked">5678</li>
+        <li aria-checked="true" role="checkbox" data-list="checked">0123</li>
+        <li aria-checked="false" role="checkbox" data-list="unchecked">5678</li>
       </ol>
       <p>0123</p>
     `);
@@ -109,7 +109,7 @@ describe('List', () => {
     expect(editor.scroll.domNode).toEqualHTML(`
       <p>0123</p>
       <ol>
-        <li data-list="bullet">5678</li>
+        <li aria-label="• 5678" style="list-style-type: none;" data-list="bullet">5678</li>
       </ol>
       <p>0123</p>
     `);
@@ -131,7 +131,7 @@ describe('List', () => {
     );
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="bullet">0123</li>
+        <li aria-label="• 0123" style="list-style-type: none;" data-list="bullet">0123</li>
       </ol>
     `);
   });
@@ -150,7 +150,7 @@ describe('List', () => {
     );
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li class="ql-align-center" data-list="bullet">0123</li>
+        <li aria-label="• 0123" style="list-style-type: none;" class="ql-align-center" data-list="bullet">0123</li>
       </ol>
     `);
   });
@@ -178,7 +178,7 @@ describe('List', () => {
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
         <li data-list="ordered">0123</li>
-        <li data-list="ordered">5678</li>
+        <li role="listitem" data-list="ordered">5678</li>
         <li data-list="ordered">0123</li>
       </ol>
     `);
@@ -232,7 +232,7 @@ describe('List', () => {
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
         <li data-list="checked">0123</li>
-        <li data-list="checked">5678</li>
+        <li aria-checked="true" role="checkbox" data-list="checked">5678</li>
         <li data-list="checked">0123</li>
       </ol>
     `);
@@ -245,13 +245,13 @@ describe('List', () => {
     editor.insertText(0, 'Test');
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered">Test</li>
+        <li aria-label="1. Test" data-list="ordered">Test</li>
       </ol>
     `);
     editor.deleteText(0, 4);
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered"><br /></li>
+        <li aria-label="1. Test" data-list="ordered"><br /></li>
       </ol>
     `);
   });
@@ -270,7 +270,7 @@ describe('List', () => {
     editor.deleteText(2, 5);
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered">0178</li>
+        <li aria-label="2. 78" data-list="ordered">0178</li>
         <li data-list="ordered">0123</li>
       </ol>
     `);
@@ -295,7 +295,7 @@ describe('List', () => {
     editor.deleteText(2, 5);
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered">0178</li>
+        <li aria-label="1. 78" data-list="ordered">0178</li>
       </ol>
     `);
   });
@@ -315,9 +315,9 @@ describe('List', () => {
     editor.formatLine(1, 10, { list: 'bullet' });
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="bullet">One</li>
-        <li class="ql-indent-1" data-list="bullet">Alpha</li>
-        <li data-list="bullet">Two</li>
+        <li aria-label="• One" data-list="bullet" style="list-style-type: none;">One</li>
+        <li class="ql-indent-1" aria-label="• Alpha" data-list="bullet" style="list-style-type: none;">Alpha</li>
+        <li aria-label="• Two" data-list="bullet" style="list-style-type: none;">Two</li>
       </ol>
     `);
   });
@@ -329,7 +329,7 @@ describe('List', () => {
     editor.formatLine(4, 1, { list: 'bullet' });
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li class="ql-align-center" data-list="bullet">Test</li>
+        <li class="ql-align-center" data-list="bullet" role="listitem">Test</li>
       </ol>
     `);
   });
@@ -345,7 +345,7 @@ describe('List', () => {
     );
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered">Te</li>
+        <li aria-label="1. Te" data-list="ordered">Te</li>
       </ol>
       <iframe allowfullscreen="true" class="ql-video" frameborder="0" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>
       <ol>
@@ -366,7 +366,7 @@ describe('List', () => {
     expect(editor.scroll.domNode).toEqualHTML(`
       <iframe allowfullscreen="true" class="ql-video" frameborder="0" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>
       <ol>
-        <li data-list="ordered">Test</li>
+        <li aria-label="1. Test" data-list="ordered">Test</li>
       </ol>
     `);
   });
@@ -382,7 +382,7 @@ describe('List', () => {
     );
     expect(editor.scroll.domNode).toEqualHTML(`
       <ol>
-        <li data-list="ordered">Test</li>
+        <li aria-label="1. Test" data-list="ordered">Test</li>
       </ol>
       <iframe allowfullscreen="true" class="ql-video" frameborder="0" src="https://www.youtube.com/embed/QHH3iSeDBLo?showinfo=0"></iframe>
       <ol>
