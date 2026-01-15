@@ -401,10 +401,6 @@ function convertHTML(
     }
     const { outerHTML, innerHTML } = blot.domNode as Element;
     const [start, end] = outerHTML.split(`>${innerHTML}<`);
-    // TODO cleanup
-    if (start === '<table') {
-      return `<table style="border: 1px solid #000;">${parts.join('')}<${end}`;
-    }
     return `${start}>${parts.join('')}<${end}`;
   }
   return blot.domNode instanceof Element ? blot.domNode.outerHTML : '';
