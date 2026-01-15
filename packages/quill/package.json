@@ -84,7 +84,7 @@
     "test": "run-s test:*",
     "test:unit": "vitest --config test/unit/vitest.config.ts",
     "test:fuzz": "vitest --config test/fuzz/vitest.config.ts",
-    "test:e2e": "NODE_OPTIONS='--no-experimental-strip-types' playwright test"
+    "test:e2e": "playwright test"
   },
   "keywords": [
     "quill",
