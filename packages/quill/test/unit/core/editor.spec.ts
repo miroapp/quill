@@ -224,7 +224,7 @@ describe('Editor', () => {
           .insert('\n', { list: 'bullet' }),
       );
       expect(editor.scroll.domNode).toEqualHTML(`
-        <ol><li data-list="bullet">0123<br class="soft-break" /><br /></li></ol>`);
+        <ol><li aria-label="• 0123" role="listitem" data-list="bullet">0123<br class="soft-break" /><br /></li></ol>`);
     });
 
     test('append soft line break in format', () => {
@@ -565,8 +565,8 @@ describe('Editor', () => {
       );
       expect(editor.scroll.domNode).toEqualHTML(
         `<ol>
-          <li data-list="ordered">0</li>
-          <li data-list="ordered">
+          <li role="listitem" data-list="ordered">0</li>
+          <li aria-label="2. 1" data-list="ordered" role="listitem">
             1
             <br class="soft-break"/>
             <br />
@@ -589,7 +589,7 @@ describe('Editor', () => {
       );
       expect(editor.scroll.domNode).toEqualHTML(
         `<ol>
-          <li data-list="ordered">0<br class="soft-break">1</li>
+          <li aria-label="1. 01" role="listitem" data-list="ordered">0<br class="soft-break">1</li>
         </ol>`,
       );
     });
