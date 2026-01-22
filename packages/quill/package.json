@@ -8,7 +8,7 @@
   "type": "module",
   "dependencies": {
     "eventemitter3": "^5.0.1",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "parchment": "^3.0.0",
     "quill-delta": "^5.1.0"
   },
