@@ -26,7 +26,8 @@ describe('Break', () => {
     selection.format('bold', true);
     selection.scroll.optimize();
 
-    const lastChild = selection.scroll.domNode.querySelector('p')?.lastElementChild;
+    const lastChild =
+      selection.scroll.domNode.querySelector('p')?.lastElementChild;
     expect(lastChild?.tagName).toBe('BR');
   });
 });
