@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures/index.js';
 import { SHORTKEY } from './utils/index.js';
 
-const SOFT_BREAK = ' ';
+const SOFT_BREAK = '\u2028';
 
 test.describe('soft break', () => {
   test('formatting a collapsed selection on the trailing line after soft-breaks does not crash', async ({
