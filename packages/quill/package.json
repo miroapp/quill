@@ -1,13 +1,13 @@
 {
   "name": "quill",
-  "version": "2.0.4-beta.32",
+  "version": "2.0.4-beta.33",
   "description": "Your powerful, rich text editor",
   "author": "Jason Chen <jhchen7@gmail.com>",
   "homepage": "https://quilljs.com",
   "main": "quill.js",
   "type": "module",
   "dependencies": {
-    "@mirohq/rich-text-delta": "^0.1.0",
+    "@mirohq/rich-text-delta": "^5.2.0",
     "eventemitter3": "^5.0.1",
     "lodash-es": "^4.17.21",
     "parchment": "^3.0.0"
