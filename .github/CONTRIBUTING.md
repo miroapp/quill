@@ -1,5 +1,7 @@
 # Contributing
 
+> ⚠️ Miro engineers: access, client linking, and Artifactory releases are in [AGENTS.md](../AGENTS.md).
+
 The best way to contribute is to help others in the Quill community. This includes:
 
 - Reporting new [bugs](https://github.com/slab/quill/labels/bug) or adding details to existing ones
