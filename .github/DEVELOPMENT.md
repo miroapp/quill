@@ -1,5 +1,7 @@
 # Development
 
+> ⚠️ Miro engineers: access, client linking, and Artifactory releases are in [AGENTS.md](../AGENTS.md).
+
 This repo is a monorepo powered by npm's official [workspace feature](https://docs.npmjs.com/cli/v10/using-npm/workspaces). It contains the following packages:
 
 ### quill
