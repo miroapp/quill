@@ -9,7 +9,9 @@ This is Miro's public fork of Quill.
 
 ## Access
 
-Clone `https://github.com/miroapp/quill.git`. Contributions need access to the `miroapp` organization, which is not `miroapp-dev`. Request it from IT: https://miro.atlassian.net/servicedesk/customer/portal/34/create/655
+`miroapp/quill` is a public repository. Clone it and open a pull request from a fork with no extra access request.
+
+Pushing a branch directly to `miroapp/quill` needs write permission on that repository. That permission is on the `miroapp` organization, not `miroapp-dev`. If you do not already have it, request it from IT: https://miro.atlassian.net/servicedesk/customer/portal/34/create/655
 
 ## Branches and pull requests
 
