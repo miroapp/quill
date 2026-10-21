@@ -51,42 +51,20 @@ Do not commit the tarball or the `./quill-*.tgz` specifier. The client's `restri
 
 ## Miro releases
 
-Versions consumed by the client are `2.0.N`. Do not publish a `-beta.N` suffix.
+`.github/workflows/publish-npm.yml` publishes `@mirohq/quill` from `packages/quill/dist` to public npm (`https://registry.npmjs.org`) using GitHub OIDC trusted publishing:
 
-- Bump `packages/quill/package.json` and `packages/quill.version` in `package-lock.json`. Leave the root `quill-monorepo` version alone.
-- Do not commit `publishConfig`, a registry URL in `.npmrc`, or credentials.
-- `.github/workflows/release.yml` publishes to public npm. The client package is published from `packages/quill/dist` to Artifactory `npm-local`. The registry URL is in the [Quill contribution guide](https://miro.atlassian.net/wiki/spaces/SD/pages/4285268031/Quill+Contribution+guide).
-- `npm publish` with no `--tag` moves the `latest` dist-tag. Do not pass `--tag beta`.
-- The client accepts only an exact `X.Y.Z` pin (`restrict-dependency-versions`). Unscoped `quill` is subject to `npmMinimalAgeGate` (24h) in the client `.yarnrc.yml`. `yarn add quill@<version> --no-time-gate` is the install bypass. Do not add unscoped `quill` to `npmPreapprovedPackages`.
+- On a same-repo pull request that changes `packages/quill/**`, CI publishes `2.0.N-<branch>.<index>` under dist-tag `pr` and comments the version on the pull request.
+- On merge to `main` (when `packages/quill/**` changes), CI publishes the next stable `2.0.N` under dist-tag `latest`.
 
-Recheck Artifactory before choosing the version. `2.0.N` numbers are not reserved.
+To test a pull-request build or pin a merged release in `client`:
 
 ```bash
 # client root
-yarn npm info quill --fields versions,dist-tags --json
-```
-
-On a checkout of the version bump:
-
-```bash
-# quill-miro/packages/quill
-# Pass --registry with the URL from the Quill contribution guide.
-npm login --registry=<registry URL from the contribution guide>
-npm whoami --registry=<registry URL from the contribution guide>
-npm run build
-cd dist
-npm publish --dry-run --registry=<registry URL from the contribution guide>
-```
-
-`packages/quill/scripts/build` copies `package.json` into `dist`. Confirm the dry-run version, then run the same `npm publish` without `--dry-run`. Remove any local `publishConfig` before committing.
-
-Then pin that exact version in the client:
-
-```bash
-# client root
-yarn add quill@2.0.N --no-time-gate
+yarn add quill@npm:@mirohq/quill@<version>
 yarn why quill
 ```
+
+When adopting the package in `client`, allow only stable `npm:@mirohq/quill@2.0.N` in `restrict-dependency-versions`. A `2.0.N-<branch>.<index>` pin still deploys a shadow build from `build-web`.
 
 ## Upstreaming
 

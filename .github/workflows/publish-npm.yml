@@ -1,0 +1,96 @@
+name: Publish npm
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/quill/**"
+  push:
+    branches: [main]
+    paths:
+      - "packages/quill/**"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact 2.0.N, or 2.0.N-<branch>.<index> for a pr build. Leave empty to compute the next version."
+        required: false
+        type: string
+      tag:
+        description: "Dist-tag. latest is published only when the selected branch is main."
+        required: true
+        type: choice
+        default: pr
+        options:
+          - pr
+          - latest
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-npm-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    uses: ./.github/workflows/_test.yml
+
+  publish:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: npm install -g npm@11.16.0
+      - run: npm ci
+
+      - name: Refuse latest from a branch other than main
+        if: github.event_name == 'workflow_dispatch' && inputs.tag == 'latest' && github.ref != 'refs/heads/main'
+        run: |
+          echo "dist-tag latest is only allowed when the selected ref is main"
+          exit 1
+
+      - id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          tag=pr
+          if [ "$EVENT_NAME" = "push" ]; then
+            tag=latest
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            tag="$INPUT_TAG"
+          fi
+          args=(--tag "$tag")
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            args+=(--version "$INPUT_VERSION")
+          fi
+          node scripts/publish-npm.mjs "${args[@]}" | tee "$RUNNER_TEMP/publish-npm.txt"
+          version="$(awk -F= '/^PUBLISHED_VERSION=/{print $2}' "$RUNNER_TEMP/publish-npm.txt")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Comment the pull request version
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file - <<'EOF'
+          Published `@mirohq/quill@${{ steps.release.outputs.version }}` (`pr`).
+
+          ```bash
+          yarn add quill@npm:@mirohq/quill@${{ steps.release.outputs.version }}
+          ```
+          EOF
