@@ -3,6 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import {
+  formatVersion,
+  nextVersionOnConflict,
+  parseVersion,
+  sanitizeBranch,
+} from "./publish-version.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = join(root, "packages/quill/dist");
@@ -13,8 +19,8 @@ const { values } = parseArgs({
   options: {
     tag: { type: "string" },
     version: { type: "string" },
+    branch: { type: "string" },
     "dry-run": { type: "boolean", default: false },
-    "write-source": { type: "boolean", default: false },
   },
 });
 
@@ -31,14 +37,7 @@ if (!values["dry-run"] && !process.env.CI) {
   fail("Refusing to publish outside CI");
 }
 
-const isExactPatch = (version) => /^2\.0\.\d+$/.test(version);
-
-const nextPatch = (version) => {
-  const patch = Number(version.split(".")[2]) + 1;
-  return `2.0.${patch}`;
-};
-
-const readPublishedPatches = async () => {
+const readPublishedVersions = async () => {
   const response = await fetch(`${registry}/${packageName}`);
   if (response.status === 404) {
     return [];
@@ -47,22 +46,76 @@ const readPublishedPatches = async () => {
     fail(`Registry returned ${response.status} for ${packageName}`);
   }
   const body = await response.json();
-  return Object.keys(body.versions || {}).filter(isExactPatch);
+  return Object.keys(body.versions || {});
+};
+
+const detectBranch = () => {
+  const explicit =
+    values.branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
+  if (explicit) {
+    return sanitizeBranch(explicit);
+  }
+  let current = "";
+  try {
+    current = execFileSync("git", ["branch", "--show-current"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
+  } catch (error) {
+    fail(
+      `Could not detect the current branch. Pass --branch. ${error.message}`,
+    );
+  }
+  if (!current) {
+    fail("Could not detect the current branch. Pass --branch.");
+  }
+  return sanitizeBranch(current);
 };
 
 const resolveVersion = async () => {
   if (values.version) {
-    if (!isExactPatch(values.version)) {
-      fail(`Version must look like 2.0.N, received ${values.version}`);
+    const parsed = parseVersion(values.version);
+    if (!parsed) {
+      fail(
+        `Version must look like 2.0.N or 2.0.N-<branch>.<index>, received ${values.version}`,
+      );
+    }
+    if (values.tag === "latest" && parsed.branch) {
+      fail(
+        `dist-tag latest requires an exact 2.0.N version, received ${values.version}`,
+      );
     }
     return values.version;
   }
-  const patches = await readPublishedPatches();
-  const highest = patches.reduce((max, version) => {
-    const patch = Number(version.split(".")[2]);
-    return patch > max ? patch : max;
+
+  const allVersions = await readPublishedVersions();
+  const stablePatches = allVersions.flatMap((version) => {
+    const parsed = parseVersion(version);
+    return parsed && !parsed.branch ? [parsed.patch] : [];
+  });
+  if (stablePatches.length === 0) {
+    fail("No stable 2.0.N is published");
+  }
+  const highestPatch = Math.max(...stablePatches);
+
+  if (values.tag === "latest") {
+    return formatVersion({ patch: highestPatch + 1, branch: "", index: 0 });
+  }
+
+  const branch = detectBranch();
+  const highestIndex = allVersions.reduce((max, version) => {
+    const parsed = parseVersion(version);
+    if (!parsed || parsed.patch !== highestPatch || parsed.branch !== branch) {
+      return max;
+    }
+    return parsed.index > max ? parsed.index : max;
   }, 0);
-  return `2.0.${highest + 1}`;
+
+  return formatVersion({
+    patch: highestPatch,
+    branch,
+    index: highestIndex + 1,
+  });
 };
 
 const build = () => {
@@ -77,6 +130,11 @@ const writeDistManifest = (version) => {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   manifest.name = packageName;
   manifest.version = version;
+  manifest.repository = {
+    type: "git",
+    url: "git+https://github.com/miroapp/quill.git",
+    directory: "packages/quill",
+  };
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 };
 
@@ -89,7 +147,7 @@ const assertBuild = () => {
   }
 };
 
-const publishOnce = (version) => {
+const publishOnce = () => {
   const args = [
     "publish",
     "--tag",
@@ -98,10 +156,8 @@ const publishOnce = (version) => {
     "public",
     "--registry",
     registry,
+    "--provenance",
   ];
-  if (values.tag === "latest") {
-    args.push("--provenance");
-  }
   try {
     const output = execFileSync("npm", args, {
       cwd: distDir,
@@ -113,45 +169,32 @@ const publishOnce = (version) => {
     process.stderr.write(error.stderr || "");
     throw error;
   }
-  return version;
 };
 
 const publish = (version) => {
   try {
-    return publishOnce(version);
+    publishOnce();
+    return version;
   } catch (error) {
     const output = `${error.stderr || ""}${error.stdout || ""}${error.message}`;
-    if (!/previously published|EPUBLISHCONFLICT|cannot publish over/i.test(output)) {
+    if (
+      !/previously published|EPUBLISHCONFLICT|cannot publish over/i.test(output)
+    ) {
       throw error;
     }
-    const retry = nextPatch(version);
-    console.error(`Version ${version} is already published. Retrying ${retry}.`);
+    let retry;
+    try {
+      retry = nextVersionOnConflict(version);
+    } catch (incrementError) {
+      fail(incrementError.message);
+    }
+    console.error(
+      `Version ${version} is already published. Retrying ${retry}.`,
+    );
     writeDistManifest(retry);
-    return publishOnce(retry);
+    publishOnce();
+    return retry;
   }
-};
-
-const writeSourceVersion = (version) => {
-  const packagePath = join(root, "packages/quill/package.json");
-  const packageText = readFileSync(packagePath, "utf8").replace(
-    /("version"\s*:\s*")[^"]+(")/,
-    `$1${version}$2`
-  );
-  writeFileSync(packagePath, packageText);
-
-  const lockPath = join(root, "package-lock.json");
-  const lockText = readFileSync(lockPath, "utf8");
-  const marker = '"packages/quill": {';
-  const start = lockText.indexOf(marker);
-  if (start === -1) {
-    fail("package-lock.json has no packages/quill entry");
-  }
-  const head = lockText.slice(start, start + 160);
-  if (!/"version": "[^"]+"/.test(head)) {
-    fail("packages/quill lockfile entry has no version");
-  }
-  const nextHead = head.replace(/"version": "[^"]+"/, `"version": "${version}"`);
-  writeFileSync(lockPath, lockText.slice(0, start) + nextHead + lockText.slice(start + head.length));
 };
 
 const version = await resolveVersion();
@@ -165,7 +208,4 @@ if (values["dry-run"]) {
 }
 
 const published = publish(version);
-if (values["write-source"]) {
-  writeSourceVersion(published);
-}
 console.log(`PUBLISHED_VERSION=${published}`);
