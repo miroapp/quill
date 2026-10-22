@@ -1,6 +1,6 @@
 # Contributing
 
-> ⚠️ Miro engineers: access, client linking, and Artifactory releases are in [AGENTS.md](../AGENTS.md).
+> ⚠️ Miro engineers: access, client linking, and npm releases are in [AGENTS.md](../AGENTS.md).
 
 The best way to contribute is to help others in the Quill community. This includes:
 

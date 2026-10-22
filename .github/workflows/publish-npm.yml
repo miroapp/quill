@@ -91,6 +91,6 @@ jobs:
           Published `@mirohq/quill@${{ steps.release.outputs.version }}` (`pr`).
 
           ```bash
-          yarn add quill@npm:@mirohq/quill@${{ steps.release.outputs.version }}
+          yarn add @mirohq/quill@${{ steps.release.outputs.version }}
           ```
           EOF
