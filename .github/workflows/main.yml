@@ -3,6 +3,10 @@ name: Main
 on:
   push:
     branches: [main]
+    paths:
+      - "**"
+      - "*"
+      - "!packages/quill/**"
 
 concurrency:
   group: main-build
