@@ -31,7 +31,7 @@ npm run build
 Sibling checkouts of `client` and `quill-miro` use:
 
 ```json
-"quill": "file:../quill-miro/packages/quill/dist"
+"@mirohq/quill": "file:../quill-miro/packages/quill/dist"
 ```
 
 After further Quill edits, run `npm run build` again. The client does not need a reinstall for that `file:` pin.
@@ -44,7 +44,7 @@ npm run build
 npm pack ./dist --pack-destination <client-root>
 
 # client root
-yarn add ./quill-<version>.tgz
+yarn add "@mirohq/quill@./quill-<version>.tgz"
 ```
 
 Do not commit the tarball or the `./quill-*.tgz` specifier. The client's `restrict-dependency-versions` rule rejects it, and no client workflow builds Quill. A client pull request installs the lockfile only.
@@ -60,11 +60,11 @@ To test a pull-request build or pin a merged release in `client`:
 
 ```bash
 # client root
-yarn add quill@npm:@mirohq/quill@<version>
-yarn why quill
+yarn add @mirohq/quill@<version>
+yarn why @mirohq/quill
 ```
 
-When adopting the package in `client`, allow only stable `npm:@mirohq/quill@2.0.N` in `restrict-dependency-versions`. A `2.0.N-<branch>.<index>` pin still deploys a shadow build from `build-web`.
+`restrict-dependency-versions` accepts exact `2.0.N` and rejects `2.0.N-<branch>.<index>`. A prerelease pin still deploys a shadow build from `build-web`.
 
 ## Upstreaming
 
